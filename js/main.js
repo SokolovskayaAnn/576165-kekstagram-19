@@ -20,9 +20,13 @@ var createPictureComments = function (amount) {
   var pictureComments = [];
 
   for (var i = 0; i < amount; i++) {
-    pictureComments.push({avatar: 'img/avatar-' + randomInteger(1, 6) + '.svg',
-      message: USER_MESSAGES[randomInteger(0, 5)],
-      name: USER_NAMES[randomInteger(0, 5)]});
+    pictureComments.push(
+        {
+          avatar: 'img/avatar-' + randomInteger(1, 6) + '.svg',
+          message: USER_MESSAGES[randomInteger(0, USER_MESSAGES.length)],
+          name: USER_NAMES[randomInteger(0, USER_NAMES.length)]
+        }
+    );
   }
 
   return pictureComments;
@@ -37,7 +41,6 @@ var createPictureDescriptions = function () {
       comments: createPictureComments(randomInteger(1, 6))});
   }
 };
-createPictureDescriptions();
 
 var createPicture = function (pictureDescription) {
   var pictureElement = pictureTemplate.cloneNode(true);
@@ -49,8 +52,13 @@ var createPicture = function (pictureDescription) {
   return pictureElement;
 };
 
-var fragment = document.createDocumentFragment();
-for (var i = 0; i < pictureDescriptions.length; i++) {
-  fragment.appendChild(createPicture(pictureDescriptions[i]));
-}
-pictureList.appendChild(fragment);
+var fillContent = function () {
+  var fragment = document.createDocumentFragment();
+  for (var i = 0; i < pictureDescriptions.length; i++) {
+    fragment.appendChild(createPicture(pictureDescriptions[i]));
+  }
+  pictureList.appendChild(fragment);
+};
+
+createPictureDescriptions();
+fillContent();
