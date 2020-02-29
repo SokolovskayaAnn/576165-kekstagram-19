@@ -7,8 +7,34 @@ var USER_MESSAGES = ['Всё отлично!', 'В целом всё непло�
   'Я поскользнулся на банановой кожуре и уронил фотоаппарат на кота и у меня получилась фотография лучше.',
   'Лица у людей на фотке перекошены, как будто их избивают. Как можно было поймать такой неудачный момент?!'];
 
+var MAX_LENGTH_OF_HASHTAG = 20;
+var MAX_AMOUNT_OF_HASHTAGS = 5;
+var ESC_KEY = 'Escape';
+var ENTER_KEY = 'Enter';
+var BASE = 10;
+var MIN_SCALE = 25;
+var MAX_SCALE = 100;
+
 var pictureList = document.querySelector('.pictures');
 var pictureTemplate = document.querySelector('#picture').content;
+
+var uploadFile = pictureList.querySelector('#upload-file');
+var uploadCancel = pictureList.querySelector('#upload-cancel');
+var editingImageWindow = pictureList.querySelector('.img-upload__overlay');
+var hashTags = pictureList.querySelector('.text__hashtags');
+var uploadPictureDescription = pictureList.querySelector('.text__description');
+
+var scaleControllSmaller = pictureList.querySelector('.scale__control--smaller');
+var scaleControllBigger = pictureList.querySelector('.scale__control--bigger');
+var scaleControllValue = pictureList.querySelector('.scale__control--value');
+var uploadPicturePrewiew = pictureList.querySelector('.img-upload__preview');
+var scaleStep = 25;
+var effectLevel = pictureList.querySelector('.effect-level');
+var effectLevelLine = effectLevel.querySelector('.effect-level__line');
+var effectLevelPin = effectLevel.querySelector('.effect-level__pin');
+var effectLevelValue = effectLevel.querySelector('.effect-level__value');
+var effectLevelDepth = effectLevel.querySelector('.effect-level__depth');
+var effectsList = pictureList.querySelector('.effects__list');
 
 var randomInteger = function (min, max) {
   var rand = min + Math.random() * (max + 1 - min);
@@ -60,5 +86,161 @@ var fillContent = function () {
   pictureList.appendChild(fragment);
 };
 
+var onEditingImageWindowEscPress = function (evt) {
+  if (evt.key === ESC_KEY && document.activeElement !== hashTags && document.activeElement !== uploadPictureDescription) {
+    closeEditingImageWindow();
+  }
+};
+
+var onHashTagInputEnterPress = function (evt) {
+  if (evt.key === ENTER_KEY) {
+    checkHashTagsValidity();
+  }
+};
+
+var onEffectRadioClick = function (evt) {
+  if (evt.target.matches('input')) {
+    changeEffect(evt);
+  }
+};
+
+var onEffectLevelPinMouseUp = function () {
+  changeEffectLevel();
+};
+
+var openEditingImageWindow = function () {
+  editingImageWindow.classList.remove('hidden');
+  document.body.classList.add('modal-open');
+  effectLevel.classList.add('visually-hidden');
+  document.addEventListener('keydown', onEditingImageWindowEscPress);
+  document.addEventListener('keydown', onHashTagInputEnterPress);
+  effectsList.addEventListener('click', onEffectRadioClick);
+  effectLevelPin.addEventListener('mouseup', onEffectLevelPinMouseUp);
+};
+
+var closeEditingImageWindow = function () {
+  uploadFile.value = '';
+  hashTags.value = '';
+  uploadPictureDescription.value = '';
+  editingImageWindow.classList.add('hidden');
+  document.body.classList.remove('modal-open');
+  document.removeEventListener('keydown', onEditingImageWindowEscPress);
+  document.removeEventListener('keydown', onHashTagInputEnterPress);
+  effectsList.removeEventListener('click', onEffectRadioClick);
+  effectLevelPin.removeEventListener('mouseup', onEffectLevelPinMouseUp);
+};
+
+var checkHashTagsValidity = function () {
+  var arrayOfHashTags = hashTags.value.toLowerCase().split(' ');
+  if (arrayOfHashTags.length > MAX_AMOUNT_OF_HASHTAGS) {
+    hashTags.setCustomValidity('Вы не можете указать больше 5 хэш-тэгов!');
+  } else {
+    for (var i = 0; i < arrayOfHashTags.length; i++) {
+      if (arrayOfHashTags[i].indexOf('#', 1) !== -1) {
+        hashTags.setCustomValidity('Хэш-теги должны разделяться пробелом!');
+      } else if (arrayOfHashTags[i].match('^[#]') === null) {
+        hashTags.setCustomValidity('Хэш-тег должен начинаться с символа #!');
+      } else if (arrayOfHashTags[i].length === 1 && arrayOfHashTags[i] === '#') {
+        hashTags.setCustomValidity('Хэш-тег не может состоять только из #!');
+      } else if (arrayOfHashTags[i].match('[^#A-Za-zА-Яа-я0-9]') !== null) {
+        hashTags.setCustomValidity('Текст хэш-тега должен состоять только из букв и чисел и не может содержать пробел, спец. символы и т.д.!');
+      } else if (arrayOfHashTags[i].length > MAX_LENGTH_OF_HASHTAG) {
+        hashTags.setCustomValidity('Максимальная длина одного хэш-тега, включая символ # - 20 символов!');
+      } else if (arrayOfHashTags.indexOf(arrayOfHashTags[i], i + 1) !== -1) {
+        hashTags.setCustomValidity('Нельзя использовать одинаковые хэш-теги: #ХэшТег = #хештег!');
+      } else {
+        hashTags.setCustomValidity('');
+      }
+    }
+  }
+};
+
+var changePictureScale = function () {
+  uploadPicturePrewiew.firstElementChild.setAttribute('style', 'transform: scale(' +
+  parseInt(scaleControllValue.value, BASE) / 100 + ');');
+};
+
+var increaseScale = function () {
+  if (parseInt(scaleControllValue.value, BASE) + scaleStep <= MAX_SCALE) {
+    scaleControllValue.setAttribute('value', parseInt(scaleControllValue.value, BASE) + scaleStep + '%');
+  } else {
+    scaleControllValue.setAttribute('value', MAX_SCALE + '%');
+  }
+  changePictureScale();
+};
+
+var decreaseScale = function () {
+  if (parseInt(scaleControllValue.value, BASE) - scaleStep >= MIN_SCALE) {
+    scaleControllValue.setAttribute('value', parseInt(scaleControllValue.value, BASE) - scaleStep + '%');
+  } else {
+    scaleControllValue.setAttribute('value', MIN_SCALE + '%');
+  }
+  changePictureScale();
+};
+
+var changeEffectLevel = function () {
+  var pinPosition = Math.round(effectLevelPin.offsetLeft / effectLevelLine.offsetWidth * 100);
+  switch (uploadPicturePrewiew.firstElementChild.className) {
+    case 'effects__preview--none':
+      uploadPicturePrewiew.firstElementChild.setAttribute('style', '');
+      break;
+    case 'effects__preview--chrome':
+      uploadPicturePrewiew.firstElementChild.setAttribute('style', 'filter: grayscale(' + pinPosition / 100 + ');');
+      effectLevelValue.setAttribute('value', pinPosition / 100);
+      break;
+    case 'effects__preview--sepia':
+      uploadPicturePrewiew.firstElementChild.setAttribute('style', 'filter: sepia(' + pinPosition / 100 + ');');
+      effectLevelValue.setAttribute('value', pinPosition / 100);
+      break;
+    case 'effects__preview--marvin':
+      uploadPicturePrewiew.firstElementChild.setAttribute('style', 'filter: invert(' + pinPosition + '%);');
+      effectLevelValue.setAttribute('value', pinPosition);
+      break;
+    case 'effects__preview--phobos':
+      uploadPicturePrewiew.firstElementChild.setAttribute('style', 'filter: blur(' + pinPosition / 100 * 3 + 'px);');
+      effectLevelValue.setAttribute('value', pinPosition / 100 * 3);
+      break;
+    case 'effects__preview--heat':
+      uploadPicturePrewiew.firstElementChild.setAttribute('style', 'filter: brightness(' + (pinPosition / 100 * 2 + 1) + ');');
+      effectLevelValue.setAttribute('value', pinPosition / 100 * 2 + 1);
+      break;
+    default:
+      uploadPicturePrewiew.firstElementChild.setAttribute('style', '');
+      effectLevelValue.setAttribute('value', '100');
+  }
+  effectLevelPin.setAttribute('style', 'left: ' + pinPosition + '%');
+  effectLevelDepth.setAttribute('style', 'width: ' + pinPosition + '%');
+};
+
+var changeEffect = function (evt) {
+  effectLevelValue.setAttribute('value', '80');
+  effectLevelPin.setAttribute('style', 'left: 80%');
+  effectLevelDepth.setAttribute('style', 'width: 80%');
+  uploadPicturePrewiew.firstElementChild.setAttribute('class', 'effects__preview--none');
+  uploadPicturePrewiew.firstElementChild.setAttribute('style', '');
+  if (evt.target.value === 'none') {
+    effectLevel.classList.add('visually-hidden');
+  } else {
+    effectLevel.classList.remove('visually-hidden');
+  }
+  uploadPicturePrewiew.firstElementChild.setAttribute('class', 'effects__preview--' + evt.target.value);
+};
+
 createPictureDescriptions();
 fillContent();
+
+uploadFile.addEventListener('change', function () {
+  openEditingImageWindow();
+});
+
+uploadCancel.addEventListener('click', function () {
+  closeEditingImageWindow();
+});
+
+scaleControllBigger.addEventListener('click', function () {
+  increaseScale();
+});
+
+scaleControllSmaller.addEventListener('click', function () {
+  decreaseScale();
+});
