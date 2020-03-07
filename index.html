@@ -30,7 +30,7 @@
       <section class="img-upload">
         <div class="img-upload__wrapper">
           <h2 class="img-upload__title  visually-hidden">Загрузка фотографии</h2>
-          <form class="img-upload__form" id="upload-select-image" method="post" enctype="multipart/form-data" autocomplete="off">
+          <form class="img-upload__form" id="upload-select-image" method="post" enctype="multipart/form-data" action="https://js.dump.academy/kekstagram" autocomplete="off">
 
             <!-- Изначальное состояние поля для загрузки изображения -->
             <fieldset class="img-upload__start">
@@ -52,7 +52,7 @@
 
                   <!-- Предварительный просмотр изображения -->
                   <div class="img-upload__preview">
-                    <img src="img/upload-default-image.jpg" alt="Предварительный просмотр фотографии">
+                    <img class="img-upload__preview-image" src="img/upload-default-image.jpg" alt="Предварительный просмотр фотографии">
                   </div>
 
                   <!-- Изменение глубины эффекта, накладываемого на изображение -->
@@ -123,7 +123,7 @@
                 </fieldset>
 
                 <!-- Кнопка для отправки данных на сервер -->
-                <button type="button" class="img-upload__submit" id="upload-submit">Опубликовать</button>
+                <button type="submit" class="img-upload__submit" id="upload-submit">Опубликовать</button>
               </div>
             </div>
           </form>
