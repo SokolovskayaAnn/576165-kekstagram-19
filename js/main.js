@@ -34,6 +34,7 @@ var uploadPictureDescription = pictureList.querySelector('.text__description');
 
 var scaleControlls = pictureList.querySelector('.img-upload__scale');
 var scaleControllValue = scaleControlls.querySelector('.scale__control--value');
+var uploadForm = pictureList.querySelector('.img-upload__form');
 var uploadPicturePreview = pictureList.querySelector('.img-upload__preview');
 var uploadPicturePreviewImage = pictureList.querySelector('.img-upload__preview-image');
 var effectLevel = pictureList.querySelector('.effect-level');
@@ -43,11 +44,11 @@ var effectLevelValue = effectLevel.querySelector('.effect-level__value');
 var effectLevelDepth = effectLevel.querySelector('.effect-level__depth');
 var effectsList = pictureList.querySelector('.effects__list');
 
-var bigPicture = document.querySelector('.big-picture');
+/* var bigPicture = document.querySelector('.big-picture');
 var commentCount = bigPicture.querySelector('.social__comment-count');
 var commentsLoader = bigPicture.querySelector('.comments-loader');
 var bigPictureCommentsList = bigPicture.querySelector('.social__comments');
-var bigPictureComment = bigPicture.querySelector('.social__comment');
+var bigPictureComment = bigPicture.querySelector('.social__comment');*/
 
 var getRandomInteger = function (min, max) {
   var rand = min + Math.random() * (max + 1 - min);
@@ -91,13 +92,13 @@ var createPicture = function (pictureDescription) {
   return pictureElement;
 };
 
-var hideBlock = function (block) {
+/* var hideBlock = function (block) {
   block.classList.add('hidden');
 };
 
 var showBlock = function (block) {
   block.classList.remove('hidden');
-};
+};*/
 
 var fillContent = function () {
   var fragment = document.createDocumentFragment();
@@ -140,7 +141,7 @@ var openEditingImageWindow = function () {
   document.body.classList.add('modal-open');
   effectLevel.classList.add('visually-hidden');
   document.addEventListener('keydown', onEditingImageWindowEscPress);
-  document.addEventListener('submit', onUploadPictureSubmit);
+  uploadForm.addEventListener('submit', onUploadPictureSubmit);
   effectsList.addEventListener('click', onEffectChange);
   scaleControlls.addEventListener('click', onScaleChange);
   effectLevelPin.addEventListener('mouseup', onEffectLevelPinMouseUp);
@@ -155,7 +156,7 @@ var closeEditingImageWindow = function () {
   editingImageWindow.classList.add('hidden');
   document.body.classList.remove('modal-open');
   document.removeEventListener('keydown', onEditingImageWindowEscPress);
-  document.removeEventListener('submit', onUploadPictureSubmit);
+  uploadForm.removeEventListener('submit', onUploadPictureSubmit);
   effectsList.removeEventListener('click', onEffectChange);
   scaleControlls.removeEventListener('click', onScaleChange);
   effectLevelPin.removeEventListener('mouseup', onEffectLevelPinMouseUp);
@@ -267,7 +268,7 @@ var changeEffect = function (evt) {
   uploadPicturePreviewImage.classList.add('effects__preview--' + evt.target.value);
 };
 
-var createBigPicture = function () {
+/* var createBigPicture = function () {
   bigPicture.querySelector('.big-picture__img').firstElementChild.src = pictureDescriptions[0].url;
   bigPicture.querySelector('.likes-count').textContent = pictureDescriptions[0].likes;
   bigPicture.querySelector('.comments-count').textContent = pictureDescriptions[0].comments.length;
@@ -286,15 +287,15 @@ var createBigPicture = function () {
 
   bigPictureCommentsList.appendChild(fragment);
   document.body.classList.add('modal-open');
-};
+};*/
 
 createPictureDescriptions();
 fillContent();
 
-showBlock(bigPicture);
+/* showBlock(bigPicture);
 hideBlock(commentCount);
 hideBlock(commentsLoader);
-createBigPicture();
+createBigPicture();*/
 
 uploadFile.addEventListener('change', function () {
   openEditingImageWindow();
